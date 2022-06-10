@@ -182,61 +182,51 @@ namespace ClassicHeist
             Console.WriteLine($"Least secure system in the bank: {leastSecure}");
 
             // Display Rolodex Report 
-            int i = 0;
             string splType;
-            Console.WriteLine("Index Name   Speciality  Skill-level  Percentage-cut");
-            foreach (var rob in rolodex)
-            {
-                splType = rob.GetType().ToString();
-                Console.WriteLine($"{i + 1}.    {rob.Name}  {splType.Split('.')[1]}   {rob.SkillLevel}  {rob.PercentageCut}");
-                i++;
-            }
-
-            List<IRobber> crew = new List<IRobber>();
-            Console.WriteLine();
-
-            Console.Write($"Select the operative to include in the heist (1 - {i}): ");
-            int index = Int32.Parse(Console.ReadLine());
-            crew.Add(rolodex[index - 1]);
-            int crewIndex = 0;
-            Console.WriteLine("Name   Speciality  Skill-level  Percentage-cut");
-            Console.WriteLine($"{crew[0].Name}  {crew[0].GetType()}   {crew[0].SkillLevel}  {crew[0].PercentageCut}");
-
             int num = -1;
-            int totalCut = crew[0].PercentageCut;
-            List<int> inputIndexes = new List<int>();
-            inputIndexes.Add(index);
+            int index = 0;
+            List<IRobber> crew = new List<IRobber>();
+            int totalCut = 0;
 
             while (true)
             {
                 Console.WriteLine();
-                Console.Write($"Select the operative to include in the heist (1 - {i}): ");
+                Console.WriteLine("Index Name   Speciality  Skill-level  Percentage-cut");
+                int i = 0;
+                foreach (var rob in rolodex)
+                {
+                    splType = rob.GetType().ToString();
+                    Console.WriteLine($"{i + 1}.    {rob.Name}  {splType.Split('.')[1]}   {rob.SkillLevel}  {rob.PercentageCut}");
+                    i++;
+                }
 
+                Console.WriteLine();
+                Console.Write($"Select the operative to include in the heist (1 - {i}): ");
                 // Int.TryParse will return false if the string is not a valid integer 
                 if (!int.TryParse(Console.ReadLine(), out num))
                 {
                     break;
                 }
+
                 index = num;
-                Console.WriteLine("percent cut: " + crew[crewIndex].PercentageCut);
 
-                if (!inputIndexes.Contains(index) && totalCut < 100
-                        && (totalCut + crew[crewIndex].PercentageCut) < 100)
+                // if percent cut of the crew reaches 100% then stop adding to crew list.
+                if ((totalCut + rolodex[index - 1].PercentageCut) <= 100)
                 {
-                    inputIndexes.Add(index);
                     crew.Add(rolodex[index - 1]);
-                    crewIndex++;
-
-                    Console.WriteLine("Name   Speciality  Skill-level  Percentage-cut");
-                    foreach (var rob in crew)
-                    {
-                        splType = rob.GetType().ToString();
-                        Console.WriteLine($"{rob.Name}  {splType.Split('.')[1]}   {rob.SkillLevel}  {rob.PercentageCut}");
-                        totalCut += rob.PercentageCut;
-                    }
+                    rolodex.RemoveAt(index - 1);
+                    totalCut += crew.Last().PercentageCut;
                 }
+                else
+                {
+                    Console.WriteLine();
+                    Console.WriteLine("Percentage cut for this operative can't be offered. Select another operative!!!");
+                }
+
             }
 
+            Console.WriteLine();
+            Console.WriteLine("Crew is ready for heist!!");
             Console.WriteLine();
             foreach (var robber in crew)
             {
@@ -252,21 +242,21 @@ namespace ClassicHeist
 
                 foreach (var robber in crew)
                 {
-                    Console.WriteLine($"{robber.Name}'s share: {robber.PercentageCut}");
+                    Console.WriteLine($"{robber.Name}'s share: {robber.PercentageCut}% => ${myBank.CashOnHand * robber.PercentageCut / 100}");
                 }
             }
             else
             {
-                Console.WriteLine("Heist failed!!");
+                Console.WriteLine("Hard luck...Heist failed!!");
             }
+
         }
 
     }
 }
 
-// Open Issues:
-// 1. the report should not include operatives that require a percentage cut that can't be offered
-// (line 223 -224 needs to be worked on)
-// 2.  (You may want to update the IRobber interface and/or the implementing classes to be able to print out the specialty)
-// (good to have this implemented, not necessary though.)
+// Each functionality from Classic Heist exercise is implemented in the above code.
+// Nice to have features/ refactoring:
+// 1.  (You may want to update the IRobber interface and/or the implementing classes to be able to print out the specialty)
+// 2. Add constructors to add members to rolodex instead of using object initialization.
 
